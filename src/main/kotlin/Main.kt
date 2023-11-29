@@ -1,7 +1,23 @@
-fun main(args: Array<String>) {
-    println("Hello World!")
+import utils.ScannerInput
+import java.lang.System.exit
 
-    // Try adding program arguments via Run/Debug configuration.
-    // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
-    println("Program arguments: ${args.joinToString()}")
+fun main(args: Array<String>) {
+    runMenu()
+}
+
+fun mainMenu() : Int {
+    return ScannerInput.readNextInt("""
+        
+        
+    """.trimIndent(">"))
+}
+
+fun runMenu() {
+    do {
+        val option = mainMenu()
+        when (option) {
+
+            else -> println("Invalid option entered: ${option}")
+        }
+    } while (true)
 }
