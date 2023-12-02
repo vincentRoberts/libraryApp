@@ -44,3 +44,4 @@ class BookAPITest {
         populatedBooks = null
         emptyNotes = null
     }
+}

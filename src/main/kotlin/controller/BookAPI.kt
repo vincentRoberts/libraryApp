@@ -45,6 +45,21 @@ class BookAPI(serializerType: Serializer){
         }
     }
 
+    fun rateBook(indexToUpdate: Int, rating: Int): Boolean {
+        val foundBook = findBook(indexToUpdate)
+
+        if (foundBook != null && isValidListIndex(indexToUpdate, books)) {
+            foundBook.bookRating = foundBook.bookRating
+            return true
+        }
+
+        return false
+    }
+
+    fun rankBooksByRating(): List<Book> {
+        return books.sortedByDescending { it.bookRating }
+    }
+
     fun numberOfBooks(): Int {
         return books.size
     }

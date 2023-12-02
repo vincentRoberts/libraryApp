@@ -25,9 +25,11 @@ fun mainMenu() : Int {
          > ----------------------------------
          > | NOTE MENU                      |
          > |   1) Add a book                |
-         > |   2) List books               |
+         > |   2) List books                |
          > |   3) Update a book             |
          > |   4) Delete a book             |
+         > |   5) Rate a book               |
+         > |   6) Rank Books By Rating      |
          > ----------------------------------
          > |   20) Save notes               |
          > |   21) Load notes               |
@@ -45,6 +47,8 @@ fun runMenu() {
             2  -> listBooks()
             3  -> updateBook()
             4  -> removeBook()
+            5  -> rateBook()
+            6  -> rankBooksByRating()
             //20  -> save()
             //21  -> load()
             0  -> exitApp()
@@ -57,7 +61,8 @@ fun addBook(){
     val bookTitle = readNextLine("Enter the books title: ")
     val bookAuthor = readNextLine("Enter book Author ")
     val bookGenre = readNextLine("Enter the books genre: ")
-    val isAdded = bookAPI.add(Book(bookTitle, bookAuthor, bookGenre))
+    val bookRating = readNextInt("Enter the books rating (Between 1-5): ")
+    val isAdded = bookAPI.add(Book(bookTitle, bookAuthor, bookGenre, bookRating))
 
     if (isAdded) {
         println("Added Successfully")
@@ -96,8 +101,8 @@ fun updateBook() {
             val bookTitle = readNextLine("Enter a title for the book: ")
             val bookAuthor = readNextLine("Enter the books Author: ")
             val bookGenre = readNextLine("Enter the books Genre: ")
-
-            if (bookAPI.updateBook(indexToUpdate, Book(bookTitle, bookAuthor, bookGenre))){
+            val bookRating = readNextInt("Enter the books Rating: ")
+            if (bookAPI.updateBook(indexToUpdate, Book(bookTitle, bookAuthor, bookGenre, bookRating))){
                 println("Update Successful")
             } else {
                 println("Update Failed")
@@ -118,6 +123,41 @@ fun removeBook(){
         } else {
             println("Delete NOT Successful")
         }
+    }
+}
+
+fun rateBook() {
+    listBooks()
+    if (bookAPI.numberOfBooks() > 0) {
+        val indexToRate = readNextInt("Enter the index of the book to rate: ")
+        if (bookAPI.isValidIndex(indexToRate)) {
+            val rating = readNextInt("Enter your rating (1-5) for the book: ")
+            if (rating in 1..5) {
+                val isRated = bookAPI.rateBook(indexToRate, rating)
+                if (isRated) {
+                    println("Rating added successfully!")
+                } else {
+                    println("Failed to add rating. Please try again.")
+                }
+            } else {
+                println("Invalid rating. Please enter a value between 1 and 5.")
+            }
+        } else {
+            println("Invalid book index.")
+        }
+    }
+}
+
+fun rankBooksByRating() {
+    val rankedBooks = bookAPI.rankBooksByRating()
+
+    if (rankedBooks.isNotEmpty()) {
+        println("Books ranked by rating:")
+        rankedBooks.forEachIndexed { index, book ->
+            println("${index + 1}. ${book.bookTitle} - Rating: ${book.bookRating}")
+        }
+    } else {
+        println("No books to rank.")
     }
 }
 
