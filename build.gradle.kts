@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+
 plugins {
     kotlin("jvm") version "1.8.0"
     application
@@ -12,6 +15,10 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation("io.github.microutils:kotlin-logging:3.0.5")
+    implementation("org.slf4j:slf4j-simple:2.0.5")
+    implementation("com.thoughtworks.xstream:xstream:1.4.20")
+    implementation("org.codehaus.jettison:jettison:1.5.4")
 }
 
 tasks.test {
