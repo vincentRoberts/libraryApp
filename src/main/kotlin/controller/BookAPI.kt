@@ -70,6 +70,10 @@ class BookAPI(serializerType: Serializer){
         } else null
     }
 
+    fun searchByTitleOrAuthor(query: String): List<Book> {
+        return books.filter { it.bookTitle.contains(query, ignoreCase = true) || it.bookAuthor.contains(query, ignoreCase = true) }
+    }
+
     fun isValidListIndex(index: Int, list: List<Any>): Boolean {
         return (index >= 0 && index < list.size)
     }

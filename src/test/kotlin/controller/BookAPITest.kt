@@ -20,11 +20,11 @@ class BookAPITest {
 
     @BeforeEach
     fun setup(){
-        learnKotlin = Book("Hamlet", "Shakespeare", "Play")
-        summerHoliday = Book("Summer Holiday to France", "Rimbeau", "Holiday")
-        codeApp = Book("Code App", "Abc", "Work")
-        testApp = Book("Test App", "Def", "Work")
-        swim = Book("Swim - Pool", "Ghj", "Hobby")
+        learnKotlin = Book("Hamlet", "Shakespeare", "Play", 2)
+        summerHoliday = Book("Summer Holiday to France", "Rimbeau", "Holiday", 4)
+        codeApp = Book("Code App", "Abc", "Work", 5)
+        testApp = Book("Test App", "Def", "Work", 3)
+        swim = Book("Swim - Pool", "Ghj", "Hobby", 1)
 
         //adding 5 Note to the notes api
         populatedBooks!!.add(learnKotlin!!)

@@ -20,23 +20,22 @@ fun main(args: Array<String>) {
 
 fun mainMenu() : Int {
     return ScannerInput.readNextInt(""" 
-         > ----------------------------------
-         > |        NOTE KEEPER APP         |
-         > ----------------------------------
-         > | NOTE MENU                      |
-         > |   1) Add a book                |
-         > |   2) List books                |
-         > |   3) Update a book             |
-         > |   4) Delete a book             |
-         > |   5) Rate a book               |
-         > |   6) Rank Books By Rating      |
-         > ----------------------------------
-         > |   20) Save notes               |
-         > |   21) Load notes               |
-         > ----------------------------------
-         > |   0) Exit                      |
-         > ----------------------------------
-         > ==>> """.trimMargin(">"))
+         --------------------------------
+                NOTE KEEPER APP         
+        --------------------------------
+        1. Add a book
+        2. List books
+        3. Update a book
+        4. Delete a book
+        5. Rate a book
+        6. Rank Books By Rating
+        7. Search Book
+        --------------------------------
+        20. Save notes
+        21. Load notes
+        0. Exit 
+        --------------------------------
+        Enter number here: """.trimMargin(">"))
 }
 
 fun runMenu() {
@@ -49,6 +48,7 @@ fun runMenu() {
             4  -> removeBook()
             5  -> rateBook()
             6  -> rankBooksByRating()
+            7  -> searchBook()
             //20  -> save()
             //21  -> load()
             0  -> exitApp()
@@ -72,21 +72,7 @@ fun addBook(){
 }
 
 fun listBooks(){
-    if (bookAPI.numberOfBooks() > 0) {
-        val option = readNextInt(
-            """
-                  > --------------------------------
-                  > |   1) View ALL books          |
-                  > --------------------------------
-         > ==>> """.trimMargin(">"))
-
-        when (option) {
-            1 -> listAllBooks();
-            else -> println("Invalid option entered: $option");
-        }
-    } else {
-        println("Option Invalid - No books stored");
-    }
+             listAllBooks();
 }
 
 fun listAllBooks() {
@@ -158,6 +144,36 @@ fun rankBooksByRating() {
         }
     } else {
         println("No books to rank.")
+    }
+}
+
+fun searchBook() {
+    val searchQuery = readNextLine("Enter book title or author to search: ")
+    val foundBooks = bookAPI.searchByTitleOrAuthor(searchQuery)
+
+    if (foundBooks.isNotEmpty()) {
+        println("Found books matching the search:")
+        foundBooks.forEachIndexed { index, book ->
+            println("${index + 1}. ${book.bookTitle} by ${book.bookAuthor} - Genre: ${book.bookGenre}, Rating: ${book.bookRating}")
+        }
+    } else {
+        println("No books found matching the search criteria.")
+    }
+}
+
+fun save() {
+    try {
+        bookAPI.store()
+    } catch (e: Exception) {
+        System.err.println("Error writing to file: $e")
+    }
+}
+
+fun load() {
+    try {
+        bookAPI.load()
+    } catch (e: Exception) {
+        System.err.println("Error reading from file: $e")
     }
 }
 
