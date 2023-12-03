@@ -49,8 +49,8 @@ fun runMenu() {
             5  -> rateBook()
             6  -> rankBooksByRating()
             7  -> searchBook()
-            //20  -> save()
-            //21  -> load()
+            99  -> save()
+            100  -> load()
             0  -> exitApp()
             else -> println("Invalid option entered: ${option}")
         }
