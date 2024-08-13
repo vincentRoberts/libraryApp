@@ -35,19 +35,7 @@ class BookAPI(serializerType: Serializer){
 
 
     fun listAllBooks(): String =
-        if (books.isEmpty())  "No books stored"
-        else formatListString(books)
-
-    fun rateBook(indexToUpdate: Int, rating: Int): Boolean {
-        val foundBook = findBook(indexToUpdate)
-
-        if (foundBook != null && isValidListIndex(indexToUpdate, books)) {
-            foundBook.bookRating = foundBook.bookRating
-            return true
-        }
-
-        return false
-    }
+        if (books.isEmpty())  "No books stored" else formatListString(books)
 
 
 
@@ -88,6 +76,17 @@ class BookAPI(serializerType: Serializer){
             if (listOfBooks.equals("")) "No books for : $genre"
             else "${numberOfBooksByGenre(genre)} books with genre '$genre': $listOfBooks"
         }
+
+    fun updateBookComments(index: Int, newComments: String): Boolean {
+        val book = findBook(index)
+        return if (book != null) {
+            book.bookComments = newComments
+            true
+        } else {
+            false
+        }
+    }
+
 
     fun numberOfBooksByRating(rating: Int): Int = books.count { p: Book -> p.bookRating == rating }
 

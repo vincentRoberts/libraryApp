@@ -1,5 +1,7 @@
 import controller.BookAPI
+import controller.UserAPI
 import models.Book
+import models.User
 import mu.KotlinLogging
 import persistence.JSONSerializer
 import persistence.XMLSerializer
@@ -17,10 +19,13 @@ import kotlin.system.exitProcess
 
 private val logger = KotlinLogging.logger {}
 private val bookAPI = BookAPI(JSONSerializer(File("books.json")))
+private val userAPI = UserAPI(JSONSerializer(File("users.json")))
 
-fun main(args: Array<String>) {
+fun main() {
     runMenu()
 }
+
+
 
 // MENU
 fun mainMenu() : Int {
@@ -34,8 +39,9 @@ fun mainMenu() : Int {
         ║ 2) List Books                       ║
         ║ 3) Update Book                      ║
         ║ 4) Delete Book                      ║
-        ║ 5) Archive a note                   ║
-        ║ 6) Search Book                      ║
+        ║ 5) Search Book                      ║
+        ║ 6) View\Update Comments             ║
+        ║ 7) User Menu                        ║
         ╠═════════════════════════════════════╣
         ║ 20) Save Books                      ║
         ║ 21) Load Books                      ║
@@ -53,7 +59,9 @@ fun runMenu() {
             2  -> listBooks()
             3  -> updateBook()
             4  -> removeBook()
-            7  -> searchBook()
+            5  -> searchBook()
+            6 -> viewComments()
+            7 -> userMenu()
             20  -> save()
             21  -> load()
             0  -> exitApp()
@@ -67,7 +75,8 @@ fun addBook(){
     val bookAuthor = readNextLine("Enter book Author: ")
     val bookGenre = readValidGenre("Enter a genre  ${GenreUtility.genres}: ")
     val bookRating = readValidRating("Enter the books rating (Between 1-5): ")
-    val isAdded = bookAPI.add(Book(bookTitle, bookAuthor, bookGenre, bookRating))
+    val bookComments = readNextLine("Enter any comments you may have on the book: ")
+    val isAdded = bookAPI.add(Book(bookTitle, bookAuthor, bookGenre, bookRating, bookComments))
 
     if (isAdded) {
         println("Added Successfully")
@@ -88,6 +97,7 @@ fun listBooks(){
         ║ 2) List Books By Rating            ║
         ║ 3) List Books By Author            ║
         ║ 4) List Books By Genre             ║
+        ║ 0) Return to Main Menu             ║
         ╚════════════════════════════════════╝
          > ==>> """.trimMargin(">"))
 
@@ -96,10 +106,11 @@ fun listBooks(){
             2 -> listBooksByRating();
             3 -> listBooksByAuthor();
             4 -> listBooksByGenre();
+            0 -> return
             else -> println("Invalid option entered: " + option);
         }
     } else {
-        println("Option Invalid - No notes stored");
+        println("Option Invalid - No books stored");
     }
 }
 // LIST BOOKS
@@ -134,7 +145,8 @@ fun updateBook() {
             val bookAuthor = readNextLine("Enter the books Author: ")
             val bookGenre = readValidGenre("Enter the books Genre ${GenreUtility.genres}: ")
             val bookRating = readValidRating("Enter the books Rating: ")
-            if (bookAPI.updateBook(indexToUpdate, Book(bookTitle, bookAuthor, bookGenre, bookRating))){
+            val bookComments = readNextLine("Enter comments you may have on the book: ")
+            if (bookAPI.updateBook(indexToUpdate, Book(bookTitle, bookAuthor, bookGenre, bookRating, bookComments))){
                 println("Update Successful")
             } else {
                 println("Update Failed")
@@ -144,6 +156,159 @@ fun updateBook() {
         }
     }
 }
+
+// VIEW COMMENTS MENU
+fun viewComments(){
+    if (bookAPI.numberOfBooks() > 0) {
+        val option = readNextInt(
+            """
+        ╔════════════════════════════════════╗
+        ║            COMMENTS                ║
+        ╠════════════════════════════════════╣
+        ╠════════════════════════════════════╣
+        ║ 1) View Comments By Title          ║
+        ║ 2) Update Comments                 ║
+        ║ 0) Return to Main Menu             ║
+        ╚════════════════════════════════════╝
+         > ==>> """.trimMargin(">"))
+
+        when (option) {
+            1 -> viewCommentsByTitle();
+            2 -> updateBookComments();
+            0 -> return
+            else -> println("Invalid option entered: " + option);
+        }
+    } else {
+        println("Option Invalid - No notes stored");
+    }
+}
+
+// VIEW COMMENTS BY TITLE
+fun viewCommentsByTitle() {
+    val searchQuery = readNextLine("Enter the book title to view comments: ")
+    val booksList = bookAPI.searchByTitleOrAuthor(searchQuery)
+    if (booksList.isNotEmpty()) {
+        booksList.forEach { book ->
+            println("Title: ${book.bookTitle}")
+            println("Comments: ${book.bookComments.ifEmpty { "No comments" }}")
+            println("----------")
+        }
+    } else {
+        println("No books found with title containing '$searchQuery'.")
+    }
+}
+
+// UPDATE COMMENTS (INDEX)
+fun updateBookComments() {
+    listAllBooks()
+    if (bookAPI.numberOfBooks() > 0) {
+        val indexToUpdate = readNextInt("Enter the index of the book to update comments: ")
+        if (bookAPI.isValidIndex(indexToUpdate)) {
+            val newComments = readNextLine("Enter the new comments for the book: ")
+            if (bookAPI.updateBookComments(indexToUpdate, newComments)) {
+                println("Comments updated successfully.")
+            } else {
+                println("Update failed. Book not found.")
+            }
+        } else {
+            println("Invalid index number.")
+        }
+    } else {
+        println("No books available to update.")
+    }
+}
+
+fun userMenu() {
+        val option = readNextInt(
+            """
+            ╔════════════════════════════════════╗
+            ║            USER MENU               ║
+            ╠════════════════════════════════════╣
+            ║ 1) Register User                   ║
+            ║ 2) List Users                      ║
+            ║ 3) Update User                     ║
+            ║ 4) Remove User                     ║
+            ║ 5) Search User by Username         ║
+            ║ 0) Return to Main Menu             ║
+            ╚════════════════════════════════════╝
+             > ==>> """.trimMargin(">"))
+
+        when (option) {
+            1 -> registerUser()
+            2 -> listUsers()
+            3 -> updateUser()
+            4 -> removeUser()
+            5 -> searchUserByUsername()
+            0 -> return
+            else -> println("Invalid option entered: $option")
+        }
+
+}
+
+
+fun registerUser() {
+    val username = readNextLine("Enter username: ")
+    val password = readNextLine("Enter password: ")
+    val email = readNextLine("Enter email: ")
+
+    val userAdded = userAPI.addUser(User(username, password, email))
+    if (userAdded) {
+        println("User registered successfully.")
+    } else {
+        println("User registration failed.")
+    }
+}
+
+fun listUsers() {
+    println(userAPI.listAllUsers())
+}
+
+fun updateUser() {
+    listUsers()
+    if (userAPI.numberOfUsers() > 0) {
+        val indexToUpdate = readNextInt("Enter the index of the user to update: ")
+        if (userAPI.isValidIndex(indexToUpdate)) {
+            val username = readNextLine("Enter new username: ")
+            val password = readNextLine("Enter new password: ")
+            val email = readNextLine("Enter new email: ")
+            if (userAPI.updateUser(indexToUpdate, User(username, password, email))) {
+                println("User updated successfully.")
+            } else {
+                println("Update failed.")
+            }
+        } else {
+            println("Invalid index number.")
+        }
+    }
+}
+
+fun removeUser() {
+    listUsers()
+    if (userAPI.numberOfUsers() > 0) {
+        val indexToDelete = readNextInt("Enter the index of the user to remove: ")
+        val userToDelete = userAPI.removeUser(indexToDelete)
+        if (userToDelete != null) {
+            println("User removed successfully: ${userToDelete.username}")
+        } else {
+            println("User removal failed.")
+        }
+    }
+}
+
+fun searchUserByUsername() {
+    val searchQuery = readNextLine("Enter username to search: ")
+    val foundUsers = userAPI.searchByUsername(searchQuery)
+
+    if (foundUsers.isNotEmpty()) {
+        println("Found users matching the search:")
+        foundUsers.forEachIndexed { index, user ->
+            println("${index + 1}. ${user.username} - Email: ${user.email}")
+        }
+    } else {
+        println("No users found matching the search criteria.")
+    }
+}
+
 
 // REMOVE BOOK
 fun removeBook(){
